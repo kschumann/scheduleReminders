@@ -96,9 +96,9 @@ function createTemplate(){
            ]];  
       exampleRange.setValues(exampleContent).setFontStyle('italic');
     }
-    console.info(sheetId + "Template Created for sheet Id:" + reminderSheetId);    
+    console.info(sheetId + "-Template Created for sheet Id:" + reminderSheetId);    
   } catch (e){
-    console.error('createTemplate failed, error: ' + e);
+    console.error(sheetId + '-createTemplate failed, error: ' + e);
   }
 
 }
@@ -181,7 +181,7 @@ function setPropertyId(hour){
     PropertiesService.getUserProperties().setProperty('triggerTime', triggerTime);
     return docId;
   } catch (e) {
-    console.error('setPropertyId failed, error: ' + e);
+    console.error(docId+'-setPropertyId failed, error: ' + e);
   }
 }
 
@@ -244,7 +244,7 @@ function getDocProps(){
         };
     return docInfo;
   } catch (e){
-    console.error('getDocProps failed, error: ' + e);
+    console.error(savedDocId + '-getDocProps failed, error: ' + e);
   }
 }
 
@@ -298,7 +298,7 @@ function sendReminders() {
       var secondReminderDates = createArray(secondDateValues);
     }
   } catch(e){
-    console.error('sendReminders-Setup failed, error: ' + e);
+    console.error(docId + '-sendReminders-Setup failed, error: ' + e);
     catchError(e);
     clearAll();
     return;
@@ -334,7 +334,7 @@ function sendReminders() {
         }
       }
     } catch(e){
-      console.error('sendReminders-1stDate failed, error: ' + e);
+      console.error(docId +'-sendReminders-1stDate failed, error: ' + e);
       catchError(e);
       clearAll();
       return;
@@ -369,7 +369,7 @@ function sendReminders() {
         }
       }
     } catch(e){
-      console.error('sendReminders-2ndDate failed, error: ' + e);      
+      console.error(docId + '-sendReminders-2ndDate failed, error: ' + e);      
       catchError(e);
       clearAll();
       return;
@@ -389,8 +389,10 @@ function catchError(e){
     user, 
     errorSubject, 
     errorBody
-  );    
+  );
+  console.log("Error email sent to user: " + user);
 }
+
 
 function formatTime(hour){
   try{
@@ -410,6 +412,7 @@ function formatTime(hour){
     
   }
 }
+
 
 //create single array from list
 function createArray(array){

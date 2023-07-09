@@ -217,6 +217,12 @@ function getDocProps(){
     var trigger = doesTriggerExist('sendReminders');
     trigger = trigger ? true : false;
     var savedDocId = PropertiesService.getUserProperties().getProperty('reminderDocId');
+    try{
+      var ss =  SpreadsheetApp.openById(savedDocId)
+    } catch(e){
+      PropertiesService.getUserProperties().setProperty('reminderDocId','');
+      savedDocId = '';
+    }
     if(trigger){
       var triggerTime = PropertiesService.getUserProperties().getProperty('triggerTime');
       if(!triggerTime){
@@ -233,7 +239,7 @@ function getDocProps(){
       var ss =  SpreadsheetApp.openById(savedDocId);
       var savedSsName = ss.getName();
     } else {
-      var savedSsName = null;}
+      var savedSsName = "";}
     var docInfo = 
         {
           "savedDocId":savedDocId,

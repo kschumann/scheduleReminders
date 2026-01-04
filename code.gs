@@ -205,7 +205,7 @@ function doesPropIdExist(){
   var propIdExists = false;
   for(var i = 0; i<userKeys.length;i++){
     if(userKeys[i] == 'reminderDocId'){
-      var propIdExists = true;
+      propIdExists = true;
     } 
   }
   return propIdExists;
@@ -226,20 +226,21 @@ function getDocProps(){
     if(trigger){
       var triggerTime = PropertiesService.getUserProperties().getProperty('triggerTime');
       if(!triggerTime){
-        var triggerTime = "2:00am";   
+        triggerTime = "2:00am";   
       }
       
     } else { 
-      var triggerTime = "None";
+      triggerTime = "None";
     }
     var currentDocId = SpreadsheetApp.getActive().getId();
-    var emailSheet = SpreadsheetApp.getActive().getSheetByName('EmailReminders');
-    var usingSaved = savedDocId == currentDocId ? true : false;  
+    //var emailSheet = SpreadsheetApp.getActive().getSheetByName('EmailReminders');
+    var usingSaved = savedDocId == currentDocId ? true : false; 
+    var savedSsName = ""; 
     if (savedDocId){
       var ss =  SpreadsheetApp.openById(savedDocId);
-      var savedSsName = ss.getName();
+      savedSsName = ss.getName();
     } else {
-      var savedSsName = "";}
+      savedSsName = "";}
     var docInfo = 
         {
           "savedDocId":savedDocId,
@@ -260,6 +261,8 @@ function getDocProps(){
 /*parse the designated sheet and send out emails*/
 function sendReminders() {  
   try{
+    var sheet = null;
+    var numbRows = 0;
     var docId = PropertiesService.getUserProperties().getProperty('reminderDocId');
     var sheetId = PropertiesService.getUserProperties().getProperty('reminderSheetId');
    var ss = SpreadsheetApp.openById(docId);
@@ -318,12 +321,16 @@ function sendReminders() {
       }
       for(var j = 0; j < firstReminderDates.length; j++){ 
         if(firstReminderDates[j]){
-          var firstDateFormatted ="";
-          try{
-          var firstDateFormatted = Utilities.formatDate(firstReminderDates[j], timeZone, "YYYY-MM-dd");
-          } catch(e){
-           // console.error(e);
-          }
+        var firstDateFormatted = "";
+        var dateToCheck = firstReminderDates[j];
+
+        // V8 Validation: Check if it is a valid Date object and not "Invalid Date"
+        if (dateToCheck instanceof Date && !isNaN(dateToCheck.valueOf())) {
+          firstDateFormatted = Utilities.formatDate(dateToCheck, timeZone, "YYYY-MM-dd");
+        } else {
+          // Optional: Log which row has bad data so you can debug user issues later
+          console.warn("Row " + (j + 2) + " has an invalid date: " + dateToCheck);
+        }
           if(firstDateFormatted == todayFormatted){
             MailApp.sendEmail(
               allValues[j][2], //to:
@@ -354,11 +361,14 @@ function sendReminders() {
       for(var k = 0; k < secondReminderDates.length; k++){
         if(secondReminderDates[k]){
           var secondDateFormatted = "";
-          try{
-          var secondDateFormatted = Utilities.formatDate(secondReminderDates[k], timeZone, "YYYY-MM-dd");   
-          } catch(e){
-          // console.error(e);
-          }
+            var dateToCheck = secondReminderDates[k]; // Get the specific date
+            // V8 Validation: Check if it is a valid Date object
+            if (dateToCheck instanceof Date && !isNaN(dateToCheck.valueOf())) {
+              secondDateFormatted = Utilities.formatDate(dateToCheck, timeZone, "YYYY-MM-dd");
+            } else {
+              // Optional: Log bad data
+              console.warn("Row " + (k + 2) + " has an invalid second date: " + dateToCheck);
+            }
           if(secondDateFormatted == todayFormatted){
             MailApp.sendEmail(
               allValues[k][2], //to:
@@ -389,7 +399,7 @@ function sendReminders() {
 function catchError(e){
   var errorSubject = "Error Processing Send Reminder Data";
   var errorBody = "There was an error processing your data.  Ensure that you have at least one row of data and that all columns match the template in order, especially date fields and email fields (multiple emails must be separated by commas).  The error is as follows: " + e + ".";
-  errorBody = errorBody + "\n\nThe dialy email send has been stopped.  Please correct data in your sheet and then use Settings in the Add-On menu to re-start. \n\n";
+  errorBody = errorBody + "\n\nThe daily email send has been stopped.  Please correct data in your sheet and then use Settings in the Add-On menu to re-start. \n\n";
   var user = Session.getEffectiveUser().getEmail();
   MailApp.sendEmail(
     user, 
@@ -419,6 +429,21 @@ function formatTime(hour){
   }
 }
 
+//Create formated date string for comparison purposes
+//function makeDayMonth(input){
+//  try{
+//    var date = new Date(input);
+//    var day = date.getDate();
+//    var month = date.getMonth();
+//    var year = date.getFullYear()
+//    var dayMonth = day.toString() +"-" + month.toString() + "-" + year.toString(); 
+//    return dayMonth;
+//    
+//  } catch (e) {
+//    console.error('makeDayMonth failed, error: ' + e);
+//  }
+//}
+
 
 //create single array from list
 function createArray(array){
@@ -428,3 +453,4 @@ function createArray(array){
   }
   return newArray;
 }  
+

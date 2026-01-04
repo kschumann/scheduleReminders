@@ -1,85 +1,125 @@
 <!DOCTYPE html>
 <html>
   <head>
-  <base target="_top">
-  <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
-  <style>
-  .branding-below {
-  bottom: 56px;
-  top: 0;
-  }  
-  
-  .cell {
-  padding-left: 15px;
-  padding-right: 15px;
-  }
-  
-  #DocInfo {
-  padding-left: 20px;
-  padding-right: 20px;
-  }
-  #clear, #update {
-  margin-left:10px;
-  margin-right:10px;
-  }
-  </style>
-  <script>  
-  function showSuccessSetup(){
-  var successHtml = "<h4>Setup Complete!</4><p>All events that you enter into this sheet will be evaluated daily at the requested time.  Reminders will be sent on the dates you indicate.</p>";
-  var successHtml = successHtml + "<p>If you have any questions or comments, please look through the <a href='#'>Add-On Instructions</a> or email <a href='mailto:admin@plowsharesolutions.com'>admin@plowsharesolutions.com</a></p>";
-  var successHtml =  successHtml + "<br /><input id='runNow' class='action' type='button' value='Run Now' onclick='google.script.run.withSuccessHandler(showSuccessRun).sendReminders();' />  </span>";
-  successHtml = successHtml + "<input type='button' value='Close' onclick='google.script.host.close();' />";
-  document.getElementById('DocInfo').innerHTML = successHtml;
-  }  
-  
-  function showSuccessRun(){
-  var successHtml = "<h4>Send Completed!</4><p>All events that you entered into this sheet have been evaluated and reminders sent for days that match today's date. If an error occurred, an email was sent to you with details.</p>";
-  var successHtml = successHtml + "<p>If you have any questions or comments, please look through the <a href='#'>Add-On Instructions</a> or email <a href='mailto:admin@plowsharesolutions.com'>admin@plowsharesolutions.com</a></p>";
-  successHtml = successHtml + "<br /><input type='button' class='action' value='Close' onclick='google.script.host.close();' />";
-  document.getElementById('DocInfo').innerHTML = successHtml;
-  }    
-  
-  function showSuccessClear(){
-  var successHtml = "<h4>Your Document and Trigger settings have been cleared!</4>";
-  successHtml = successHtml + "<p>If you have any questions or comments, please look through the <a href='#'>Add-On Instructions</a> or email <a href='mailto:admin@plowsharesolutions.com'>admin@plowsharesolutions.com</a></p>";
-  successHtml = successHtml + "<br /><input type='button' value='Close' onclick='google.script.host.close();' />   ";
-  successHtml = successHtml + "<input type='button' class='action' value='Set Up Sheet' onclick='google.script.run.withSuccessHandler(showDocProps).getDocProps();' />";
-  document.getElementById('DocInfo').innerHTML = successHtml;
-  }
-  
-  function showDocProps(docInfo){
-      var docName = docInfo.savedSsName ? docInfo.savedSsName : "No Sheet Set";
-      var docId = docInfo.savedDocId ? docInfo.savedDocId : "No Sheet Set";
-      var trigger = docInfo.trigger ? docInfo.triggerTime : "Not Scheduled";
-      var timeSelection = "<p><label for='hour-select'>Select the time each day that messages should be sent:</label><select name='hours' id='hour-select'>";
-      var timeSelection = timeSelection + "<option value=0>midnight - 1am</option><option value=1>1am - 2am</option><option selected value=2>2am - 3am</option><option value=3>3am - 4am</option><option value=4>4am - 5am</option><option value=5>5am - 6am</option><option value=6>6am - 7am</option><option value=7>7am - 8am</option><option value=8>8am - 9am</option><option value=9>9am - 10am</option><option value=10>10am - 11am</option><option value=11>11am - 12pm</option><option value=12>12pm - 1pm</option><option value=13>1pm - 2pm</option><option value=14>2pm - 3pm</option><option value=15>3pm - 4pm</option><option value=16>4pm - 5pm</option><option value=17>5pm - 6pm</option><option value=18>6pm - 7pm</option><option value=19>7pm - 8pm</option><option value=20>8pm - 9pm</option><option value=21>9pm - 10pm</option><option value=22>10pm - 11pm</option><option value=23>11pm - midnight</option>";
-      var timeSelection = timeSelection + "</select></p>";
-      if(docInfo.trigger){
-      var advisoryMessage = "<p>The following sheet is currently set up.  Use the Clear Settings button to reset the Add-On and stop sending daily emails.</p>";
-      var button =  "<span><input id='clear' type='button' value='Clear Add-On User Settings' onclick='google.script.run.withSuccessHandler(showSuccessClear).clearAll();' />";
-     var button =  button + "<input id='runNow' class='action' type='button' value='Run Now' onclick='google.script.run.withSuccessHandler(showSuccessRun).sendReminders();' /></span>";
-      } else{
-      var advisoryMessage = timeSelection + "<p>Use the Set Up button below to get started.</p>"; 
-      var button = "<input id='update' class='action' type='button' value='Set Up This Sheet' onclick='google.script.run.activateTrigger(document.getElementById(\"hour-select\").value); google.script.run.withSuccessHandler(showSuccessSetup).createTemplate();' /></span>";
+    <base target="_top">
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+    <style>
+      .branding-below {
+        bottom: 56px;
+        top: 0;
+      }   
+      
+      .cell {
+        padding-left: 15px;
+        padding-right: 15px;
       }
       
-      var html ="<h3>These are your current Add-On Settings.</h3>";
-      html = html + "<p><b>Active Googlesheet Name: </b>" + docName + "</p>";
-      html = html + "<p><b>Googlesheet Id: </b>" + docId + "</p>";
-      html = html + "<p><b>Daily Email Send: </b>" + trigger + "</p>";
-      html = html + advisoryMessage;
-      html = html + "<br />" + button;
-      document.getElementById("DocInfo").innerHTML = html;
-  }
-  </script>
+      #DocInfo {
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+      #clear, #update {
+        margin-left:10px;
+        margin-right:10px;
+      }
+    </style>
+    <script>  
+    
+      // --- SUCCESS HANDLERS ---
+      
+      function showSuccessSetup(){
+        var successHtml = "<h4>Setup Complete!</h4><p>All events that you enter into this sheet will be evaluated daily at the requested time.  Reminders will be sent on the dates you indicate.</p>";
+        successHtml += "<p>If you have any questions or comments, please look through the <a href='#'>Add-On Instructions</a> or email <a href='mailto:admin@plowsharesolutions.com'>admin@plowsharesolutions.com</a></p>";
+        successHtml += "<br /><input id='runNow' class='action' type='button' value='Run Now' onclick='google.script.run.withSuccessHandler(showSuccessRun).sendReminders();' />  </span>";
+        successHtml += "<input type='button' value='Close' onclick='google.script.host.close();' />";
+        document.getElementById('DocInfo').innerHTML = successHtml;
+      }  
+      
+      function showSuccessRun(){
+        var successHtml = "<h4>Send Completed!</h4><p>All events that you entered into this sheet have been evaluated and reminders sent for days that match today's date. If an error occurred, an email was sent to you with details.</p>";
+        successHtml += "<p>If you have any questions or comments, please look through the <a href='#'>Add-On Instructions</a> or email <a href='mailto:admin@plowsharesolutions.com'>admin@plowsharesolutions.com</a></p>";
+        successHtml += "<br /><input type='button' class='action' value='Close' onclick='google.script.host.close();' />";
+        document.getElementById('DocInfo').innerHTML = successHtml;
+      }    
+      
+      function showSuccessClear(){
+        var successHtml = "<h4>Your Document and Trigger settings have been cleared!</h4>";
+        successHtml += "<p>If you have any questions or comments, please look through the <a href='#'>Add-On Instructions</a> or email <a href='mailto:admin@plowsharesolutions.com'>admin@plowsharesolutions.com</a></p>";
+        successHtml += "<br /><input type='button' value='Close' onclick='google.script.host.close();' />   ";
+        successHtml += "<input type='button' class='action' value='Set Up Sheet' onclick='google.script.run.withSuccessHandler(showDocProps).getDocProps();' />";
+        document.getElementById('DocInfo').innerHTML = successHtml;
+      }
+
+      function onSetupFailure(error) {
+         var errorHtml = "<h4>Error During Setup</h4><p>We could not complete the setup: " + error.message + "</p>";
+         errorHtml += "<input type='button' value='Close' onclick='google.script.host.close();' />";
+         document.getElementById('DocInfo').innerHTML = errorHtml;
+      }
+      
+      // --- LOGIC HANDLERS ---
+
+      // 1. New function to handle the Setup Sequence safely
+      function handleSetup() {
+         // Disable button to prevent double clicks
+         document.getElementById('update').disabled = true;
+         document.getElementById('update').value = "Working...";
+         
+         // Step 1: Create the template. 
+         // If success -> Call activateTrigger. 
+         // If failure -> Show error.
+         google.script.run
+           .withSuccessHandler(function() {
+               // Step 2: Template created successfully, now set the trigger
+               var hour = document.getElementById("hour-select").value;
+               google.script.run
+                 .withSuccessHandler(showSuccessSetup) // Step 3: Show Success UI
+                 .withFailureHandler(onSetupFailure)
+                 .activateTrigger(hour);
+           })
+           .withFailureHandler(onSetupFailure)
+           .createTemplate();
+      }
+
+      function showDocProps(docInfo){
+          var docName = docInfo.savedSsName ? docInfo.savedSsName : "No Sheet Set";
+          var docId = docInfo.savedDocId ? docInfo.savedDocId : "No Sheet Set";
+          var trigger = docInfo.trigger ? docInfo.triggerTime : "Not Scheduled";
+          
+          var timeSelection = "<p><label for='hour-select'>Select the time each day that messages should be sent:</label><select name='hours' id='hour-select'>";
+          timeSelection += "<option value=0>midnight - 1am</option><option value=1>1am - 2am</option><option selected value=2>2am - 3am</option><option value=3>3am - 4am</option><option value=4>4am - 5am</option><option value=5>5am - 6am</option><option value=6>6am - 7am</option><option value=7>7am - 8am</option><option value=8>8am - 9am</option><option value=9>9am - 10am</option><option value=10>10am - 11am</option><option value=11>11am - 12pm</option><option value=12>12pm - 1pm</option><option value=13>1pm - 2pm</option><option value=14>2pm - 3pm</option><option value=15>3pm - 4pm</option><option value=16>4pm - 5pm</option><option value=17>5pm - 6pm</option><option value=18>6pm - 7pm</option><option value=19>7pm - 8pm</option><option value=20>8pm - 9pm</option><option value=21>9pm - 10pm</option><option value=22>10pm - 11pm</option><option value=23>11pm - midnight</option>";
+          timeSelection += "</select></p>";
+          
+          var button = "";
+          var advisoryMessage = "";
+
+          if(docInfo.trigger){
+            advisoryMessage = "<p>The following sheet is currently set up.  Use the Clear Settings button to reset the Add-On and stop sending daily emails.</p>";
+            button =  "<span><input id='clear' type='button' value='Clear Add-On User Settings' onclick='google.script.run.withSuccessHandler(showSuccessClear).clearAll();' />";
+            button += "<input id='runNow' class='action' type='button' value='Run Now' onclick='google.script.run.withSuccessHandler(showSuccessRun).sendReminders();' /></span>";
+          } else{
+            advisoryMessage = timeSelection + "<p>Use the Set Up button below to get started.</p>"; 
+            // CHANGED: onclick now calls the safe handleSetup() function
+            button = "<input id='update' class='action' type='button' value='Set Up This Sheet' onclick='handleSetup()' /></span>";
+          }
+          
+          var html ="<h3>These are your current Add-On Settings.</h3>";
+          html += "<p><b>Active Googlesheet Name: </b>" + docName + "</p>";
+          html += "<p><b>Googlesheet Id: </b>" + docId + "</p>";
+          html += "<p><b>Daily Email Send: </b>" + trigger + "</p>";
+          html += advisoryMessage;
+          html += "<br />" + button;
+          document.getElementById("DocInfo").innerHTML = html;
+      }
+    </script>
   </head>
   <body onload="google.script.run.withSuccessHandler(showDocProps).getDocProps();">
-  <div class="modalDialog branding-below">
-  <div id="DocInfo">
-  <h4>Please wait while document properties are checked....</h4>
-  </div>
-  </div>
+    <div class="modalDialog branding-below">
+      <div id="DocInfo">
+        <h4>Please wait while document properties are checked....</h4>
+      </div>
+    </div>
   </body>
 </html>
+
 
 
